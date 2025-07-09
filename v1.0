@@ -1,0 +1,95 @@
+Add-Type -AssemblyName System.Windows.Forms
+# הגדר את היישום לא להציג חלון קונסולה
+[System.Windows.Forms.Application]::EnableVisualStyles()
+
+
+Add-Type -AssemblyName PresentationCore, PresentationFramework
+
+# יצירת חלון ראשי
+$window = New-Object System.Windows.Window
+$window.Title = "הפיכת טקסט עברי"
+$window.Width = 500
+$window.Height = 400
+$window.WindowStartupLocation = "CenterScreen"
+$window.ResizeMode = "noResize"
+
+# יצירת Grid לעיצוב
+$grid = New-Object System.Windows.Controls.Grid
+$window.Content = $grid
+
+# הגדרת שורות ועמודות
+$grid.RowDefinitions.Add((New-Object System.Windows.Controls.RowDefinition))
+$grid.RowDefinitions.Add((New-Object System.Windows.Controls.RowDefinition))
+$grid.RowDefinitions.Add((New-Object System.Windows.Controls.RowDefinition))
+$grid.RowDefinitions.Add((New-Object System.Windows.Controls.RowDefinition))
+
+# תווית עבור תיבת הטקסט המקורית
+$labelInput = New-Object System.Windows.Controls.Label
+$labelInput.Content = ":הכנס טקסט עברי"
+$labelInput.FontSize = 16
+$labelInput.FontWeight = "Bold"
+$labelInput.HorizontalAlignment = "Right"
+$labelInput.Margin = "10,10,10,5"
+[System.Windows.Controls.Grid]::SetRow($labelInput, 0)
+$grid.Children.Add($labelInput)
+
+# תיבת טקסט עבור הקלט
+$textBoxInput = New-Object System.Windows.Controls.TextBox
+$textBoxInput.FontSize = 16
+$textBoxInput.Height = 100
+$textBoxInput.Margin = "10,5,10,10"
+$textBoxInput.TextWrapping = "Wrap"
+$textBoxInput.AcceptsReturn = $true
+$textBoxInput.FlowDirection = "RightToLeft"
+$textBoxInput.VerticalScrollBarVisibility = "Auto"
+[System.Windows.Controls.Grid]::SetRow($textBoxInput, 1)
+$grid.Children.Add($textBoxInput)
+
+# תווית עבור תיבת הטקסט המהופכת
+$labelOutput = New-Object System.Windows.Controls.Label
+$labelOutput.Content = ":טקסט מהופך"
+$labelOutput.FontSize = 16
+$labelOutput.FontWeight = "Bold"
+$labelOutput.HorizontalAlignment = "Right"
+$labelOutput.Margin = "10,10,10,5"
+[System.Windows.Controls.Grid]::SetRow($labelOutput, 2)
+$grid.Children.Add($labelOutput)
+
+# תיבת טקסט עבור הפלט
+$textBoxOutput = New-Object System.Windows.Controls.TextBox
+$textBoxOutput.FontSize = 16
+$textBoxOutput.Height = 100
+$textBoxOutput.Margin = "10,5,10,10"
+$textBoxOutput.TextWrapping = "Wrap"
+$textBoxOutput.IsReadOnly = $true
+$textBoxOutput.FlowDirection = "RightToLeft"
+$textBoxOutput.VerticalScrollBarVisibility = "Auto"
+$textBoxOutput.Background = [System.Windows.Media.Brushes]::LightGray
+[System.Windows.Controls.Grid]::SetRow($textBoxOutput, 3)
+$grid.Children.Add($textBoxOutput)
+
+# פונקציה להפיכת טקסט עברי
+function Reverse-HebrewText {
+    param([string]$text)
+    
+    if ([string]::IsNullOrEmpty($text)) {
+        return ""
+    }
+    
+    # המרת הטקסט למערך תווים והפיכתו
+    $chars = $text.ToCharArray()
+    [Array]::Reverse($chars)
+    
+    # החזרת הטקסט המהופך
+    return -join $chars
+}
+
+# אירוע שינוי בתיבת הטקסט (הפיכה אוטומטית)
+$textBoxInput.Add_TextChanged({
+    $inputText = $textBoxInput.Text
+    $reversedText = Reverse-HebrewText -text $inputText
+    $textBoxOutput.Text = $reversedText
+})
+
+# הצגת החלון
+$window.ShowDialog() | Out-Null
